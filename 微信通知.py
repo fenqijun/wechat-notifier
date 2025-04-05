@@ -370,107 +370,6 @@ class WeChatMonitor:
                                     pass
                     except Exception as e:
                         logging.debug(f"备用方法查找失败: {e}")
-            
-            # 如果未找到微信窗口或未找到消息，尝试检查托盘
-            if not wechat_window or not wechat_window.Exists(1):
-                logging.debug("尝试检查托盘中的微信...")
-                try:
-                    # 查找托盘窗口
-                    tray_window = auto.WindowControl(ClassName="TrayNotifyWnd")
-                    if tray_window.Exists(1):
-                        logging.debug("找到托盘窗口")
-                        
-                        # 查找托盘中的列表项
-                        list_items = tray_window.GetChildren()
-                        for item in list_items:
-                            try:
-                                # 检查是否是微信图标
-                                panes = item.GetChildren()
-                                for pane in panes:
-                                    try:
-                                        # 查找联系人名称和消息数量
-                                        texts = pane.GetChildren()  # 使用GetChildren()替代FindAllByType
-                                        contact_name = None
-                                        message_count = None
-                                        
-                                        for text in texts:
-                                            try:
-                                                text_name = text.Name
-                                                if text_name.isdigit():
-                                                    message_count = int(text_name)
-                                                else:
-                                                    contact_name = text_name
-                                            except:
-                                                pass
-                                        
-                                        if contact_name and message_count:
-                                            logging.info(f"从托盘找到未读消息: {contact_name} - {message_count}条")
-                                            self.process_new_message(contact_name, message_count)
-                                    except:
-                                        pass
-                            except:
-                                pass
-                except Exception as e:
-                    logging.debug(f"检查托盘失败: {e}")
-                    
-                    # 尝试使用win32gui查找托盘图标
-                    try:
-                        def enum_windows_callback(hwnd, results):
-                            if win32gui.IsWindowVisible(hwnd):
-                                window_text = win32gui.GetWindowText(hwnd)
-                                class_name = win32gui.GetClassName(hwnd)
-                                if class_name == "TrayNotifyWnd":
-                                    results.append(hwnd)
-                                    return False  # 找到后停止枚举
-                            return True
-                        
-                        results = []
-                        win32gui.EnumWindows(enum_windows_callback, results)
-                        
-                        if results:
-                            tray_hwnd = results[0]
-                            logging.debug(f"找到托盘窗口: {tray_hwnd}")
-                            
-                            # 尝试查找托盘中的微信图标
-                            def find_wechat_icon(hwnd, results):
-                                try:
-                                    window_text = win32gui.GetWindowText(hwnd)
-                                    class_name = win32gui.GetClassName(hwnd)
-                                    if "微信" in window_text or "WeChat" in window_text:
-                                        results.append(hwnd)
-                                except:
-                                    pass
-                                return True
-                            
-                            icon_results = []
-                            win32gui.EnumChildWindows(tray_hwnd, find_wechat_icon, icon_results)
-                            
-                            if icon_results:
-                                logging.debug(f"找到托盘中的微信图标: {icon_results[0]}")
-                                # 尝试点击图标显示主窗口
-                                try:
-                                    win32gui.SendMessage(icon_results[0], win32con.WM_LBUTTONDOWN, 0, 0)
-                                    win32gui.SendMessage(icon_results[0], win32con.WM_LBUTTONUP, 0, 0)
-                                    logging.debug("点击托盘图标")
-                                    time.sleep(1)  # 等待窗口显示
-                                    
-                                    # 再次尝试查找主窗口
-                                    wechat_window = auto.WindowControl(searchDepth=1, ClassName="WeChatMainWndForPC")
-                                    if wechat_window.Exists(1):
-                                        logging.debug("点击托盘图标后找到微信窗口")
-                                        # 递归调用自身重新扫描
-                                        self.scan_wechat_ui()
-                                        
-                                        # 点击完成后，将窗口最小化回托盘
-                                        try:
-                                            wechat_window.ShowWindow(win32con.SW_MINIMIZE)
-                                            logging.debug("将微信窗口最小化回托盘")
-                                        except:
-                                            pass
-                                except Exception as e:
-                                    logging.debug(f"点击托盘图标失败: {e}")
-                    except Exception as e:
-                        logging.debug(f"使用win32gui查找托盘图标失败: {e}")
         
         except Exception as e:
             logging.error(f"扫描微信UI时出错: {e}")
@@ -481,7 +380,7 @@ class WeChatMonitor:
         """消息循环，处理Windows消息"""
         msg = wintypes.MSG()
         last_scan_time = 0
-        scan_interval = 2  # 扫描间隔，单位秒
+        scan_interval = 1  # 扫描间隔减少到1秒，提高消息检测的及时性
         
         logging.info("开始消息循环...")
         print("开始监听微信消息...")
@@ -502,8 +401,8 @@ class WeChatMonitor:
                 # 清理过期的会话记录
                 self.cleanup_old_records()
             
-            # 短暂休眠，减少CPU占用
-            time.sleep(0.1)
+            # 短暂休眠，减少CPU占用但保持响应及时
+            time.sleep(0.05)  # 减少休眠时间，提高响应速度
 
     def cleanup_old_records(self):
         """清理超过5分钟未更新的会话记录"""
