@@ -289,65 +289,21 @@ class WeChatMonitor:
                     if chat_list.Exists(1):
                         logging.debug("找到会话列表控件")
                         
-                        # 获取所有列表项
+                        # 获取所有可见列表项
                         list_items = chat_list.GetChildren()
                         logging.debug(f"会话列表项数量: {len(list_items)}")
                         
-                        # 遍历列表项查找包含"条新消息"的项
-                        for item in list_items:
-                            try:
-                                item_name = item.Name
-                                logging.debug(f"列表项名称: {item_name}")
-                                
-                                # 检查是否包含"条新消息"
-                                if "条新消息" in item_name:
-                                    # 提取联系人名称和消息数量
-                                    # 格式: "联系人名称X条新消息"
-                                    match = re.search(r'(.+?)(\d+)条新消息', item_name)
-                                    if match:
-                                        chat_name = match.group(1).strip()
-                                        message_count = int(match.group(2))
-                                        logging.info(f"找到未读消息: {chat_name} - {message_count}条")
-                                        self.process_new_message(chat_name, message_count)
-                                    else:
-                                        # 尝试查找子控件获取更多信息
-                                        panes = item.GetChildren()
-                                        contact_name = None
-                                        message_count = None
-                                        
-                                        for pane in panes:
-                                            try:
-                                                # 尝试查找联系人名称
-                                                static_text = pane.TextControl(searchDepth=2)
-                                                if static_text.Exists(1):
-                                                    if not contact_name:
-                                                        contact_name = static_text.Name
-                                                    elif static_text.Name.isdigit():
-                                                        message_count = int(static_text.Name)
-                                            except:
-                                                pass
-                                        
-                                        if contact_name and message_count:
-                                            logging.info(f"通过子控件找到未读消息: {contact_name} - {message_count}条")
-                                            self.process_new_message(contact_name, message_count)
-                            except Exception as e:
-                                logging.debug(f"处理列表项时出错: {e}")
+                        # 先处理可见项
+                        self._process_list_items(list_items)
+                        
+                        # 尝试滚动列表查找更多项
+                        self._scroll_and_scan(chat_list)
+                        
                     else:
                         # 如果没有找到会话列表，尝试查找所有ListItem控件
                         logging.debug("未找到会话列表，尝试查找所有ListItem控件")
                         list_items = wechat_window.GetChildren()
-                        for item in list_items:
-                            try:
-                                item_name = item.Name
-                                if "条新消息" in item_name:
-                                    match = re.search(r'(.+?)(\d+)条新消息', item_name)
-                                    if match:
-                                        chat_name = match.group(1).strip()
-                                        message_count = int(match.group(2))
-                                        logging.info(f"从ListItem找到未读消息: {chat_name} - {message_count}条")
-                                        self.process_new_message(chat_name, message_count)
-                            except:
-                                pass
+                        self._process_list_items(list_items)
                 except Exception as e:
                     logging.debug(f"查找会话列表时出错: {e}")
                     
@@ -375,12 +331,81 @@ class WeChatMonitor:
             logging.error(f"扫描微信UI时出错: {e}")
             import traceback
             logging.error(traceback.format_exc())
+    
+    def _process_list_items(self, list_items):
+        """处理列表项"""
+        for item in list_items:
+            try:
+                item_name = item.Name
+                logging.debug(f"列表项名称: {item_name}")
+                
+                # 检查是否包含"条新消息"
+                if "条新消息" in item_name:
+                    # 提取联系人名称和消息数量
+                    # 格式: "联系人名称X条新消息"
+                    match = re.search(r'(.+?)(\d+)条新消息', item_name)
+                    if match:
+                        chat_name = match.group(1).strip()
+                        message_count = int(match.group(2))
+                        logging.info(f"找到未读消息: {chat_name} - {message_count}条")
+                        self.process_new_message(chat_name, message_count)
+                    else:
+                        # 尝试查找子控件获取更多信息
+                        panes = item.GetChildren()
+                        contact_name = None
+                        message_count = None
+                        
+                        for pane in panes:
+                            try:
+                                # 尝试查找联系人名称
+                                static_text = pane.TextControl(searchDepth=2)
+                                if static_text.Exists(1):
+                                    if not contact_name:
+                                        contact_name = static_text.Name
+                                    elif static_text.Name.isdigit():
+                                        message_count = int(static_text.Name)
+                            except:
+                                pass
+                        
+                        if contact_name and message_count:
+                            logging.info(f"通过子控件找到未读消息: {contact_name} - {message_count}条")
+                            self.process_new_message(contact_name, message_count)
+            except Exception as e:
+                logging.debug(f"处理列表项时出错: {e}")
+    
+    def _scroll_and_scan(self, chat_list):
+        """滚动列表并扫描更多项"""
+        try:
+            # 获取列表的位置和大小
+            rect = chat_list.BoundingRectangle
+            
+            # 尝试滚动列表
+            scroll_attempts = 3  # 滚动尝试次数
+            for i in range(scroll_attempts):
+                # 模拟滚动操作
+                auto.WheelDown(wheelTimes=3, x=rect.xcenter(), y=rect.ycenter())
+                time.sleep(0.2)  # 等待滚动完成
+                
+                # 获取滚动后的列表项
+                new_items = chat_list.GetChildren()
+                logging.debug(f"滚动后列表项数量: {len(new_items)}")
+                
+                # 处理新的列表项
+                self._process_list_items(new_items)
+                
+            # 滚动回顶部
+            for i in range(scroll_attempts):
+                auto.WheelUp(wheelTimes=3, x=rect.xcenter(), y=rect.ycenter())
+                time.sleep(0.1)
+                
+        except Exception as e:
+            logging.debug(f"滚动列表时出错: {e}")
 
     def message_loop(self):
         """消息循环，处理Windows消息"""
         msg = wintypes.MSG()
         last_scan_time = 0
-        scan_interval = 1  # 扫描间隔减少到1秒，提高消息检测的及时性
+        scan_interval = 0.5  # 减少扫描间隔到0.5秒，提高消息检测的及时性
         
         logging.info("开始消息循环...")
         print("开始监听微信消息...")
@@ -401,8 +426,8 @@ class WeChatMonitor:
                 # 清理过期的会话记录
                 self.cleanup_old_records()
             
-            # 短暂休眠，减少CPU占用但保持响应及时
-            time.sleep(0.05)  # 减少休眠时间，提高响应速度
+            # 极短休眠，减少CPU占用但保持高响应速度
+            time.sleep(0.01)  # 将休眠时间从0.05秒减少到0.01秒
 
     def cleanup_old_records(self):
         """清理超过5分钟未更新的会话记录"""
