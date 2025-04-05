@@ -24,7 +24,7 @@
 
 ## 安装依赖
 
-在使用前，请确保安装以下依赖库：
+在使用前，请确保安装以下依赖库（下载exe文件可直接运行无需安装依赖库）：
 
 ```bash
 pip install pywin32 psutil winotify uiautomation
@@ -40,7 +40,7 @@ python d:\Code\微信notice\微信通知.py
 ```
 
 3. 工具将在后台运行，当有新消息时会自动弹出系统通知
-4. 按Ctrl+C可以停止程序
+4. 按Ctrl+C可以停止程序（在编辑器环境下，exe不受影响）
 
 ## 工作原理
 
