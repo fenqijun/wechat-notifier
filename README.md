@@ -1,8 +1,4 @@
 # Windows微信消息弹窗通知工具
-
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/b328aeb1-ceb4-4366-ade6-0acff4ddd4fe" width="600" alt="界面示意图">
-  <br>
   
   [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
   
@@ -18,6 +14,9 @@
 ! 已弃用版本：~~微信消息通知.exe~~（不再维护）
 ```
 
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/b328aeb1-ceb4-4366-ade6-0acff4ddd4fe" width="600" alt="界面示意图">
+  <br>
 ## 功能 ✨
 
 - **实时监控**：自动检测微信窗口消息变化
