@@ -4,7 +4,6 @@
   
   > 🔔 **重要提醒**  
   > 建议置顶聊天不超过5个，否则可能遮挡会话导致无法通知
-</div>
 
 ---
 
@@ -17,6 +16,7 @@
 <div align="center">
   <img src="https://github.com/user-attachments/assets/b328aeb1-ceb4-4366-ade6-0acff4ddd4fe" width="600" alt="界面示意图">
   <br>
+  </div>
 ## 功能 ✨
 
 - **实时监控**：自动检测微信窗口消息变化
