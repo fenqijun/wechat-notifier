@@ -7,7 +7,7 @@
   [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
   
   > 🔔 **重要提醒**  
-  > 建议置顶聊天不超过5个，否则可能遮挡会话导致无法通知
+  > 建议置顶聊天不超过5个，否则可能遮挡会话导致无法通知。（暂不支持微信4.0版本）
 </div>
 
 ---
