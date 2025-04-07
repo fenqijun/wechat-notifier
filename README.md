@@ -1,9 +1,14 @@
 # Windows微信消息弹窗通知工具
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/b328aeb1-ceb4-4366-ade6-0acff4ddd4fe" width="600" alt="界面示意图">
+  <br>
   
   [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
   
   > 🔔 **重要提醒**  
   > 建议置顶聊天不超过5个，否则可能遮挡会话导致无法通知
+</div>
 
 ---
 
@@ -13,10 +18,6 @@
 ! 已弃用版本：~~微信消息通知.exe~~（不再维护）
 ```
 
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/b328aeb1-ceb4-4366-ade6-0acff4ddd4fe" width="600" alt="界面示意图">
-  <br>
-  </div>
 ## 功能 ✨
 
 - **实时监控**：自动检测微信窗口消息变化
@@ -72,4 +73,3 @@ icon=r"C:\path\to\wechat.png"
 1. 系统通知权限是否开启
 2. 微信窗口是否保持前台打开
 3. 图标路径是否正确
-4. 检查置顶聊天是否过多
