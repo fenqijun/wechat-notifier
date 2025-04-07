@@ -1,70 +1,58 @@
-# 微信消息弹窗通知工具
+# Windows微信消息弹窗通知工具
 
-## 项目简介
+![image](https://github.com/user-attachments/assets/b328aeb1-ceb4-4366-ade6-0acff4ddd4fe)
 
-这是一个基于Python开发的微信消息通知工具，可以在后台监控微信消息，当有新消息到达时，通过Windows系统通知提醒用户，即使微信窗口被最小化或被其他窗口覆盖。
 
-## exe程序无需安装，双击即可静默运行（无窗口），可通过任务管理器查看和终止程序状态。注：请关闭windows勿扰模式
+[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-![f2ff457573149ad2ce9b47520f33128](https://github.com/user-attachments/assets/4020f925-9bea-4d76-ae63-9b775c97bd90)
+Windows微信消息弹窗通知，通过系统通知提醒新消息，支持消息过滤和防骚扰模式。
 
-## 功能特点
+## 功能特性 ✨
 
-- 自动检测微信窗口并监控新消息
-- 通过Windows系统通知显示新消息提醒
-- 显示消息发送者和新消息数量
-- 后台运行，低资源占用
-- 自动清理过期的会话记录
+- 实时监控微信聊天列表的新消息（被遮挡的会话无法进行通知）
+- 智能过滤系统消息和时间戳
+- 防骚扰模式（5秒内超过3条消息自动聚合）
+- 支持多种消息类型：
+  - 文本消息
+  - 语音消息提示
+  - 转账提醒
+  - 红包通知
+- 多线程监控架构
+- 完整的日志记录系统
 
-## 技术实现
+## 运行要求 🖥️
 
-该工具主要通过以下技术实现消息监控：
+- Windows 10/11
+- WeChat 3.9+ 桌面版
+- Python 3.7+
 
-1. **Windows API钩子**：使用Windows事件钩子监听微信窗口的变化
-2. **UI自动化**：使用uiautomation库扫描微信界面查找未读消息
-3. **Windows通知**：使用winotify库发送系统通知
+## 快速开始 🚀
 
-## 安装依赖
-
-在使用前，请确保安装以下依赖库（下载exe文件可直接运行无需安装依赖库）：
-
+### 安装依赖
 ```bash
-pip install pywin32 psutil winotify uiautomation
+pip install uiautomation==2.0.15 winotify==0.3.0 psutil==5.9.0 pywin32==306
 ```
+### 配置说明
+1. 修改微信图标路径（可选）
 
-## 使用方法
+# 微信通知.py 第35行
+icon=r"C:\path\to\wechat.png"
 
-1. 确保微信已经登录并运行
-2. 运行微信通知工具：
+## 常见问题 ❓
+### 通知不显示？
+✅ 检查：
 
-```bash
-python d:\Code\微信notice\微信通知.py
-```
+1. 系统通知权限是否开启
+2. 微信窗口是否保持前台打开
+3. 图标路径是否正确
 
-3. 工具将在后台运行，当有新消息时会自动弹出系统通知
-4. 按Ctrl+C可以停止程序（在编辑器环境下，exe不受影响）
+# 启用调试模式
+set LOG_LEVEL=DEBUG && python 微信通知.py
 
-## 工作原理
+## 贡献指南 🤝
+欢迎提交PR！建议改进方向：
 
-1. 程序启动后，首先查找微信主窗口
-2. 安装Windows事件钩子，监听窗口变化事件
-3. 定期扫描微信界面，查找包含未读消息的会话
-4. 当检测到新消息时，发送Windows系统通知
-5. 自动清理5分钟内未更新的会话记录，减少内存占用
-
-## 日志记录
-
-程序运行过程中的日志会记录在`wechat_notifier.log`文件中，可用于排查问题。日志级别默认设置为DEBUG，记录详细的运行信息。
-
-## 注意事项
-
-- 请确保微信已经登录并正常运行
-- 程序使用端口12345检测是否已有实例在运行，避免重复启动
-- 如遇到问题，可查看日志文件进行排查
-- 程序需要在有图形界面的环境中运行
-
-## 系统要求
-
-- Windows操作系统
-- Python 3.6+
-- 微信PC版
+- 支持自定义通知模板
+- 添加多语言支持
+- 实现消息历史存储
