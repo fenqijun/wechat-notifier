@@ -39,7 +39,6 @@ def find_wechat_window():
     # 设置 UIAutomation 配置，允许处理隐藏控件
     auto.SetGlobalSearchTimeout(0.5)  # 设置搜索超时
     auto.uiautomation.SEARCH_INTERVAL = 0.2  # 设置搜索间隔
-    auto.uiautomation.MAX_SEARCH_DEPTH = 10  # 设置最大搜索深度
     
     logging.info("找到微信窗口")
     return wechat_window
@@ -80,9 +79,33 @@ def monitor_wechat_messages():
     finally:
         pythoncom.CoUninitialize()
 
+# 在全局变量区域添加
+notification_history = {}  # 格式: {contact_name: (last_time, count)}
+
 def send_notification(title, message):
     """发送Windows系统通知"""
     try:
+        # 速率限制检查
+        contact_name = message.split('\n')[0].split(' (')[0]
+        now = time.time()
+        
+        # 获取历史记录
+        last_time, count = notification_history.get(contact_name, (0, 0))
+        
+        # 判断是否需要抑制通知
+        if now - last_time < 5:  # 5秒窗口期
+            if count >= 3:
+                # 超过3条则抑制通知，只更新计数
+                notification_history[contact_name] = (last_time, count + 1)
+                logging.debug(f"抑制通知: {contact_name} 计数 {count + 1}")
+                return
+            else:
+                # 前3条正常通知
+                notification_history[contact_name] = (now, count + 1)
+        else:
+            # 新时间窗口开始
+            notification_history[contact_name] = (now, 1)
+        
         # 分割消息内容
         message_parts = message.split('\n')
         title_text = message_parts[0]
@@ -100,6 +123,20 @@ def send_notification(title, message):
         toast.set_audio(NOTIFICATION_SOUND, loop=False)
         toast.show()
         logging.info(f"通知已发送: {message}")
+
+        # 当计数达到4时发送汇总通知
+        if count + 1 >= 4:
+            notification_history[contact_name] = (0, 0)  # 重置计数
+            summary_msg = f"{contact_name} ({count + 1}条新消息)\n最新内容: {message.split('\n')[-1]}"
+            toast = Notification(
+                app_id="微信",
+                title="多条新消息",
+                msg=summary_msg,
+                icon=r"C:\Users\Administrator\Desktop\微信.png",
+                duration="short"
+            )
+            toast.set_audio(NOTIFICATION_SOUND, loop=False)
+            toast.show()
     except Exception as e:
         logging.error(f"发送通知失败: {e}")
 
@@ -113,8 +150,8 @@ def extract_message_content(control):
         if "条新消息" not in control.Name:
             return None
             
-        # 提取联系人名称和消息数量（处理"已置顶"的情况）
-        match = re.match(r"(.+?)(?:已置顶)?(\d+)条新消息$", control.Name)
+        # 修正后的正则表达式，明确分离联系人名称和消息数量
+        match = re.match(r"^(.+?)(?:已置顶)?(\d+)条新消息$", control.Name)
         if not match:
             return None
             
@@ -123,22 +160,37 @@ def extract_message_content(control):
         
         # 获取最新消息内容
         latest_message = ""
-        max_top = 0
         
         def find_text_controls(ctrl):
-            nonlocal latest_message, max_top
-            # 递归查找所有子控件
+            nonlocal latest_message
+            # 按深度优先顺序遍历控件
             for child in ctrl.GetChildren():
-                # 检查是否是消息内容控件
-                if (child.ControlType == 50020 and child.Name and 
-                    child.Name != contact_name and 
-                    not re.match(r"\d{1,2}:\d{2}", child.Name) and  # 排除时间
-                    not child.Name.isdigit()):  # 排除消息数量
-                    latest_message = child.Name
-                    break  # 找到消息内容后直接退出
-                
-                # 继续递归查找
+                # 优先处理深层嵌套的控件
                 find_text_controls(child)
+                
+                # 后判断当前控件是否符合条件（确保深层控件优先）
+                if child.ControlType == 50020:
+                    # 增加筛选条件：控件高度必须大于30像素（过滤数字角标）
+                    if (child.BoundingRectangle.height() > 30 and 
+                        is_valid_message_content(child.Name, contact_name)):
+                        
+                        logging.debug(f"有效消息内容: {child.Name}")
+                        latest_message = child.Name
+                        return  # 优先取深层控件后立即返回
+
+        # 移除process_special_message函数
+        def is_valid_message_content(message, contact_name):
+            """判断是否为有效消息内容"""
+            return (not re.match(r"\d{1,2}:\d{2}", message) and
+                    message != contact_name)
+
+        def process_special_message(message):
+            """处理特殊消息类型"""
+            # 语音消息处理
+            if message == '1':
+                return '[语音]'
+            # 其他消息直接返回
+            return message
         
         # 开始递归查找文本控件
         find_text_controls(control)
@@ -199,7 +251,7 @@ def main():
     wechat_window = find_wechat_window()
     if not wechat_window:
         toast = Notification(
-            app_id="微信",
+            app_id="微信监控",
             title="等待微信窗口",
             msg="请确保微信窗口已打开，程序将在检测到窗口后自动运行",
             icon=r"C:\Users\Administrator\Desktop\微信.png",
