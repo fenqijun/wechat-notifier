@@ -7,6 +7,7 @@
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 
 实时监控微信聊天消息并通过系统通知提醒的工具，支持智能过滤和防骚扰模式。
+建议置顶聊天不超过5个，否则可能遮挡会话导致无法通知。
 
 ## 功能 ✨
 
