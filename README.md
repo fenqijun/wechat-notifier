@@ -1,9 +1,5 @@
 # Windows微信消息弹窗通知工具
 
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/b328aeb1-ceb4-4366-ade6-0acff4ddd4fe" width="600" alt="界面示意图">
-</div>
-
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 
 实时监控微信聊天消息并通过系统通知提醒的工具，支持智能过滤和防骚扰模式。
@@ -19,6 +15,10 @@
   - 转账提醒
   - 红包通知
 - **日志系统**：完整记录运行状态和错误信息
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/b328aeb1-ceb4-4366-ade6-0acff4ddd4fe" width="600" alt="界面示意图">
+</div>
 
 ## 运行要求 🖥️
 
