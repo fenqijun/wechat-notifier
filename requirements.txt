@@ -1,4 +1,4 @@
+uiautomation==2.0.15
+winotify==0.3.0
+psutil==5.9.0
 pywin32==306
-psutil==5.9.5
-winotify==1.1.0
-uiautomation==2.0.17
