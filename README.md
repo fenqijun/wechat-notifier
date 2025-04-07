@@ -1,30 +1,29 @@
 # Windows微信消息弹窗通知工具
 
-![image](https://github.com/user-attachments/assets/b328aeb1-ceb4-4366-ade6-0acff4ddd4fe)
-
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/b328aeb1-ceb4-4366-ade6-0acff4ddd4fe" width="600" alt="界面示意图">
+</div>
 
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Windows微信消息弹窗通知，通过系统通知提醒新消息，支持消息过滤和防骚扰模式。
+实时监控微信聊天消息并通过系统通知提醒的工具，支持智能过滤和防骚扰模式。
 
 ## 功能特性 ✨
 
-- 实时监控微信聊天列表的新消息（被遮挡的会话无法进行通知）
-- 智能过滤系统消息和时间戳
-- 防骚扰模式（5秒内超过3条消息自动聚合）
-- 支持多种消息类型：
+- **实时监控**：自动检测微信窗口消息变化
+- **智能过滤**：排除时间戳和系统干扰信息
+- **频率控制**：5秒内超过3条消息自动聚合
+- **多消息支持**：
   - 文本消息
-  - 语音消息提示
+  - 语音提示
   - 转账提醒
   - 红包通知
-- 多线程监控架构
-- 完整的日志记录系统
+- **日志系统**：完整记录运行状态和错误信息
 
 ## 运行要求 🖥️
 
-- Windows 10/11
-- WeChat 3.9+ 桌面版
+- Windows 10/11 系统
+- 微信桌面版 3.9+
 - Python 3.7+
 
 ## 快速开始 🚀
